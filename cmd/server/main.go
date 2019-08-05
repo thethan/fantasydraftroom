@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
-	"github.com/thethan/fdr_rankings/pkg/stats"
+	"github.com/thethan/fantasydraftroom/pkg/stats"
 
 	"net"
 	"net/http"

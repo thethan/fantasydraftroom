@@ -35,7 +35,6 @@ func New( logger log.Logger, svc Service) Set {
 // MakeStatImportEndpoint constructs a Sum endpoint wrapping the service.
 func MakeStatImportEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		fmt.Printf("in the midst of the Make %+v", ctx)
 		_ = request.(StatImportRequest)
 		_, err = svc.ImportPlayer(ctx, 1)
 		return StatImportResponse{Message: "hello ethan..."}, nil
