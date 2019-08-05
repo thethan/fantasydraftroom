@@ -146,10 +146,11 @@ func main() {
 	// them to ports or anything yet; we'll do that next.
 	router := mux.NewRouter()
 
+	routerStats := router.PathPrefix("/go/").Subrouter()
 	var (
 		service     = stats.NewService(logger)
 		endpoints   = stats.New(logger, service)
-		httpHandler = stats.NewHTTPHandler(router, endpoints, logger)
+		httpHandler = stats.NewHTTPHandler(routerStats, endpoints, logger)
 		//grpcServer     = addtransport.NewGRPCServer(endpoints, tracer, zipkinTracer, logger)
 		//thriftServer   = addtransport.NewThriftServer(endpoints)
 		//jsonrpcHandler = addtransport.NewJSONRPCHandler(endpoints, logger)
