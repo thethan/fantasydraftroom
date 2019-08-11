@@ -82,6 +82,7 @@ func (s PlayerService) GetPlayersByList(ctx context.Context, draftID int, userID
 	wg.Wait()
 	close(resultsChan)
 	close(defaultOrderChan)
+	close(errorChan)
 
 	return map[string]playerToIndex{
 		"results_to_player":      results,
