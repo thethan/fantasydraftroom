@@ -3,6 +3,7 @@ package players
 import (
 	"context"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"sync"
 )
 
@@ -54,7 +55,7 @@ func (s PlayerService) GetPlayersByList(ctx context.Context, draftID int, userID
 	defaultOrderChan := make(chan Results, 1)
 	_ = make(chan Results, 1)
 	errorChan := make(chan error, 3)
-
+	level.Info(s.log).Log("msg", "starting go routines")
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
@@ -79,7 +80,17 @@ func (s PlayerService) GetPlayersByList(ctx context.Context, draftID int, userID
 		}
 	}()
 
+	go func() {
+		for err := range errorChan {
+			if err != nil {
+				level.Error(s.log).Log("msg", "error in getting player list", "error", err)
+			}
+		}
+	}()
+
 	wg.Wait()
+	level.Info(s.log).Log("msg", "wait groups closed, closing channels")
+
 	close(resultsChan)
 	close(defaultOrderChan)
 	close(errorChan)
@@ -88,6 +99,7 @@ func (s PlayerService) GetPlayersByList(ctx context.Context, draftID int, userID
 		"results_to_player":      results,
 		"default_rank": defaultRank,
 		"user_rank":    userRank,
+
 	}, nil
 
 }
