@@ -71,7 +71,7 @@ func main() {
 
 	// because this is moving from an old laravel application... that is still in use,
 	// figure i'd use dotenv
-	envMap, err := godotenv.Read("~/fantasydraftroom.com/.env")
+	envMap, err := godotenv.Read("/home/forge/fantasydraftroom.com/.env")
 	if err != nil {
 		panic("could not read .env file")
 	}
