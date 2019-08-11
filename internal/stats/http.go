@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/thethan/fantasydraftroom/internal/users"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -32,9 +33,9 @@ import (
 	"github.com/go-kit/kit/examples/addsvc/pkg/addservice"
 )
 
-// NewHTTPHandler returns an HTTP handler that makes a set of endpoints
+// NewHTTPHandler returns an HTTP handler in the shape of mux.Router that makes a set of endpoints
 // available on predefined paths.
-func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.Handler {
+func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) *mux.Router {
 	// Zipkin HTTP Server Trace can either be instantiated per endpoint with a
 	// provided operation name or a global tracing service can be instantiated
 	// without an operation name and fed to each Go kit endpoint as ServerOption.
@@ -45,7 +46,8 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorEncoder(errorEncoder),
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
-		//zipkinServer,
+		httptransport.ServerBefore(httptransport.PopulateRequestContext),
+		httptransport.ServerBefore(users.GetBearerTokenFromHeaderToContext),
 	}
 
 	router.Handle("/stats", httptransport.NewServer(
@@ -54,7 +56,7 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 		encodeHTTPGenericResponse,
 		options...,
 	))
-	//append(options, httptransport.ServerBefore(opentracing.HTTPToContext(otTracer, "Stats Import", logger)))...,
+	//append(options, httptransport.ServerBefore(opentracing.HTTPToContext(otTracer, "Stats PlayersOrder", logger)))...,
 	//m.Handle("/sum", httptransport.NewServer(
 	//	endpoints.SumEndpoint,
 	//	decodeHTTPStatImportRequest,
@@ -189,8 +191,8 @@ type errorWrapper struct {
 // JSON-encoded sum request from the HTTP request body. Primarily useful in a
 // server.
 func decodeHTTPStatImportRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var req StatImportRequest
-	fmt.Printf("decode HTTP Stats Import")
+	var req UserRequest
+	fmt.Printf("decode HTTP Stats PlayersOrder")
 	//err := json.NewDecoder(r.Body).Decode(&req)
 	return req, nil
 }

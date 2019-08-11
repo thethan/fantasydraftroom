@@ -3,10 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/go-kit/kit/log"
+	goKit "github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
-	"github.com/thethan/fantasydraftroom/pkg/stats"
+	"github.com/thethan/fantasydraftroom/internal/mysql"
+	"github.com/thethan/fantasydraftroom/internal/players"
+	"github.com/thethan/fantasydraftroom/internal/stats"
+	"github.com/thethan/fantasydraftroom/internal/users"
+	"log"
 
+	"github.com/joho/godotenv"
+	"github.com/zemirco/papertrail"
 	"net"
 	"net/http"
 	"os"
@@ -39,14 +45,48 @@ func main() {
 	fs.Usage = usageFor(fs, os.Args[0]+" [flags]")
 	fs.Parse(os.Args[1:])
 
-	// Create a single logger, which we'll use and give to other components.
-	var logger log.Logger
-	{
-		logger = log.NewJSONLogger(os.Stdout)
-
-		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
-		logger = log.With(logger, "caller", log.DefaultCaller)
+	writer := papertrail.Writer{
+		Port:    12345,
+		Network: papertrail.TCP,
 	}
+
+	// use writer directly
+	n, err := writer.Write([]byte("writer\n"))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("number of bytes written: %d\n", n)
+
+	// or create a new logger
+	plogger := log.New(&writer, "", log.LstdFlags)
+	plogger.Print("logger")
+	// Create a single logger, which we'll use and give to other components.
+	var logger goKit.Logger
+	{
+		logger = goKit.NewJSONLogger(os.Stdout)
+
+		logger = goKit.With(logger, "ts", goKit.DefaultTimestampUTC)
+		logger = goKit.With(logger, "caller", goKit.DefaultCaller)
+	}
+
+	// because this is moving from an old laravel application... that is still in use,
+	// figure i'd use dotenv
+	envMap, err := godotenv.Read(".env")
+	if err != nil {
+		panic("could not read .env file")
+	}
+
+	// Mysql Connector
+	mysqlConnector := mysql.NewConnector(logger, envMap)
+	// @todo papertrail
+
+	// Repos
+
+	userRepo := users.NewMysqlRepository(&mysqlConnector, logger)
+
+	userService := users.NewService(logger, &userRepo)
+
+	usersMiddleware := users.NewUserMiddleware(logger, userService)
 
 	// Determine which OpenTracing tracer to use. We'll pass the tracer to all the
 	// components that use it, as a dependency.
@@ -146,14 +186,27 @@ func main() {
 	// them to ports or anything yet; we'll do that next.
 	router := mux.NewRouter()
 
-	routerStats := router.PathPrefix("/go/").Subrouter()
+	routerStats := router.PathPrefix("/go/stats").Subrouter()
+	routePlayer := router.PathPrefix("/go/players").Subrouter()
+
+
+	// stats
+	statsService := stats.NewService(logger)
+	statsEndpoints := stats.New(logger, statsService, usersMiddleware)
+	stats.NewHTTPHandler(routerStats, statsEndpoints, logger)
+
+	// Players
+	playersMysqlRepository := players.NewMysqlRepository(&mysqlConnector, logger)
+
+	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
+	playersEndpoints := players.New(logger, usersMiddleware, playerService)
+
+	players.NewHTTPHandler(routePlayer, playersEndpoints, logger)
+
 	var (
-		service     = stats.NewService(logger)
-		endpoints   = stats.New(logger, service)
-		httpHandler = stats.NewHTTPHandler(routerStats, endpoints, logger)
-		//grpcServer     = addtransport.NewGRPCServer(endpoints, tracer, zipkinTracer, logger)
-		//thriftServer   = addtransport.NewThriftServer(endpoints)
-		//jsonrpcHandler = addtransport.NewJSONRPCHandler(endpoints, logger)
+	//grpcServer     = addtransport.NewGRPCServer(endpoints, tracer, zipkinTracer, logger)
+	//thriftServer   = addtransport.NewThriftServer(endpoints)
+	//jsonrpcHandler = addtransport.NewJSONRPCHandler(endpoints, logger)
 	)
 
 	// Now we're to the part of the func main where we want to start actually
@@ -168,6 +221,18 @@ func main() {
 	//
 	// Putting each component into its own block is mostly for aesthetics: it
 	// clearly demarcates the scope in which each listener/socket may be used.
+	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+		t, err := route.GetPathTemplate()
+		if err != nil {
+			return err
+		}
+		fmt.Println(t)
+		return nil
+	})
+
+	router.Use(mux.CORSMethodMiddleware(router))
+
+
 	var g group.Group
 	{
 		// The HTTP listener mounts the Go kit HTTP handler we created.
@@ -178,7 +243,7 @@ func main() {
 		}
 		g.Add(func() error {
 			logger.Log("transport", "HTTP", "addr", *httpAddr)
-			return http.Serve(httpListener, httpHandler)
+			return http.Serve(httpListener, router)
 		}, func(error) {
 			httpListener.Close()
 		})

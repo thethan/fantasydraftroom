@@ -14,7 +14,15 @@
   revision = "fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a"
 
 [[projects]]
-  digest = "1:1a5653e609a7b737d1722029d577ec5adc175edaf51cbb5895f84010cb881242"
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:765c7255c148f37200f264276be652623c7acc98feab948e7554b114de0513d7"
   name = "github.com/go-kit/kit"
   packages = [
     "circuitbreaker",
@@ -22,6 +30,7 @@
     "examples/addsvc/pkg/addendpoint",
     "examples/addsvc/pkg/addservice",
     "log",
+    "log/level",
     "metrics",
     "ratelimit",
     "tracing/opentracing",
@@ -41,6 +50,14 @@
   pruneopts = "UT"
   revision = "07c9b44f60d7ffdfb7d8efe1ad539965737836dc"
   version = "v0.4.0"
+
+[[projects]]
+  digest = "1:ec6f9bf5e274c833c911923c9193867f3f18788c461f76f05f62bb1510e0ae65"
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "72cd26f257d44c1114970e19afddcd812016007e"
+  version = "v1.4.1"
 
 [[projects]]
   digest = "1:f5ce1529abc1204444ec73779f44f94e2fa8fcdb7aca3c355b0c95947e4005c6"
@@ -63,6 +80,14 @@
   pruneopts = "UT"
   revision = "00bdffe0f3c77e27d2cf6f5c70232a2d3e4d9c15"
   version = "v1.7.3"
+
+[[projects]]
+  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
+  name = "github.com/joho/godotenv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -116,6 +141,14 @@
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:8cd208cdb0680c83db6943518298071b020c11b99adf0a984dfe0772e192c627"
   name = "github.com/sony/gobreaker"
   packages = ["."]
@@ -130,6 +163,22 @@
   packages = ["breaker"]
   pruneopts = "UT"
   revision = "d5acb3125c2a6654d2d691e6851674a645333da1"
+
+[[projects]]
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:db8fbb8c9e8341e4a95e4323f453e7c6c628718a2d3428f4cc1aca0de3bc6e7d"
+  name = "github.com/zemirco/papertrail"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cb8f5734c1813742a5ca8b6361d7002b454407a5"
 
 [[projects]]
   branch = "master"
@@ -186,6 +235,14 @@
   packages = ["rate"]
   pruneopts = "UT"
   revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
+
+[[projects]]
+  digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
+  name = "google.golang.org/appengine"
+  packages = ["cloudsql"]
+  pruneopts = "UT"
+  revision = "b2f4a3cf3c67576a2ee09e1fe62656a5086ce880"
+  version = "v1.6.1"
 
 [[projects]]
   branch = "master"
@@ -246,17 +303,22 @@
     "github.com/go-kit/kit/examples/addsvc/pkg/addendpoint",
     "github.com/go-kit/kit/examples/addsvc/pkg/addservice",
     "github.com/go-kit/kit/log",
+    "github.com/go-kit/kit/log/level",
     "github.com/go-kit/kit/metrics",
     "github.com/go-kit/kit/ratelimit",
     "github.com/go-kit/kit/tracing/opentracing",
     "github.com/go-kit/kit/tracing/zipkin",
     "github.com/go-kit/kit/transport",
     "github.com/go-kit/kit/transport/http",
+    "github.com/go-sql-driver/mysql",
     "github.com/gorilla/mux",
+    "github.com/joho/godotenv",
     "github.com/oklog/oklog/pkg/group",
     "github.com/opentracing/opentracing-go",
     "github.com/openzipkin/zipkin-go",
     "github.com/sony/gobreaker",
+    "github.com/stretchr/testify/assert",
+    "github.com/zemirco/papertrail",
     "golang.org/x/time/rate",
   ]
   solver-name = "gps-cdcl"
