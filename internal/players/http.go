@@ -38,17 +38,22 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 		httptransport.ServerBefore(httptransport.PopulateRequestContext),
 		httptransport.ServerBefore(users.GetBearerTokenFromHeaderToContext),
 	}
-
-	router.Handle("/drafts/{draftID}", httptransport.NewServer(
+	//
+	router.Methods("GET").Path("/players/drafts/{draftID}").Handler(httptransport.NewServer(
 		endpoints.PlayersOrder,
 		decodeHTTPGetPlayerOrderList,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 
+	router.Methods("POST").Path("/players/drafts/{draftID}/preference").Handler(httptransport.NewServer(
+		endpoints.PlayerPreference,
+		decodeHTTPPostPlayerPreferenceList,
+		encodeHTTPGenericResponse,
+		options...,
+	))
 	return router
 }
-
 
 func errorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 
@@ -89,9 +94,38 @@ func decodeHTTPGetPlayerOrderList(ctx context.Context, r *http.Request) (interfa
 	return req, nil
 }
 
+func decodeHTTPPostPlayerPreferenceList(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req UserPlayerPreferenceRequest
+	vars := mux.Vars(r)
+
+	draftID, ok := vars[PARAM_DRAFTID]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("could not get a %s from request", PARAM_DRAFTID))
+	}
+
+	req.DraftID, _ = strconv.Atoi(draftID)
+
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	//var intIDs []int
 
 
+	err = json.Unmarshal(b, &req)
+	if err != nil {
+		return nil, err
+	}
+	//
+	//req.Body.PlayerIDs = make([]PlayerID, len(intIDs))
+	//for idx := range intIDs {
+	//	req.PlayerIDs = append(req.PlayerIDs, req.PlayerIDs[idx])
+	//}
 
+	fmt.Printf("Request Length %d \n", len(req.Body.PlayerIDs))
+	fmt.Printf("%+v \n", req)
+
+	return req, nil
+}
 
 // encodeHTTPGenericRequest is a transport/http.EncodeRequestFunc that
 // JSON-encodes any request to the request body. Primarily useful in a client.

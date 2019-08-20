@@ -65,6 +65,8 @@ func TestMysqlRepository_GetDefaultPlayerRank(t *testing.T) {
 	repo := NewMysqlRepository(&mysql, log)
 	ctx := context.Background()
 
+	lastPlayerRank := 0
+
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
@@ -73,6 +75,7 @@ func TestMysqlRepository_GetDefaultPlayerRank(t *testing.T) {
 
 	go func() {
 		for res := range resultsChan {
+			assert.True(t, lastPlayerRank <= int(res.PlayerIndex), "lsat player rank is not less than or equal too")
 			playerToIdxMap[res.PlayerID] = res.PlayerIndex
 		}
 	}()

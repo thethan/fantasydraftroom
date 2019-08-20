@@ -31,6 +31,7 @@ func main() {
 	var (
 		//debugAddr = fs.String("debug.addr", ":8080", "Debug and metrics listen address")
 		httpAddr = fs.String("http-addr", ":8081", "HTTP listen address")
+		envLocation = fs.String("env", ".env", "Env Location")
 		//grpcAddr       = fs.String("grpc-addr", ":8082", "gRPC listen address")
 		//thriftAddr     = fs.String("thrift-addr", ":8083", "Thrift listen address")
 		//jsonRPCAddr    = fs.String("jsonrpc-addr", ":8084", "JSON RPC listen address")
@@ -46,8 +47,9 @@ func main() {
 	fs.Parse(os.Args[1:])
 
 	writer := papertrail.Writer{
-		Port:    12345,
+		Port:    42629,
 		Network: papertrail.TCP,
+		Server: "logs6",
 	}
 
 	// use writer directly
@@ -71,7 +73,7 @@ func main() {
 
 	// because this is moving from an old laravel application... that is still in use,
 	// figure i'd use dotenv
-	envMap, err := godotenv.Read("/home/forge/fantasydraftroom.com/.env")
+	envMap, err := godotenv.Read(*envLocation)
 	if err != nil {
 		panic("could not read .env file")
 	}
@@ -185,23 +187,20 @@ func main() {
 	// the interfaces that the transports expect. Note that we're not binding
 	// them to ports or anything yet; we'll do that next.
 	router := mux.NewRouter()
-
-	routerStats := router.PathPrefix("/go/stats").Subrouter()
-	routePlayer := router.PathPrefix("/go/players").Subrouter()
-
+	goRouter := router.PathPrefix("/go").Subrouter()
 
 	// stats
 	statsService := stats.NewService(logger)
 	statsEndpoints := stats.New(logger, statsService, usersMiddleware)
-	stats.NewHTTPHandler(routerStats, statsEndpoints, logger)
+	goRouter = stats.NewHTTPHandler(goRouter, statsEndpoints, logger)
 
 	// Players
 	playersMysqlRepository := players.NewMysqlRepository(&mysqlConnector, logger)
 
-	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
+	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
 	playersEndpoints := players.New(logger, usersMiddleware, playerService)
 
-	players.NewHTTPHandler(routePlayer, playersEndpoints, logger)
+	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
 
 	var (
 	//grpcServer     = addtransport.NewGRPCServer(endpoints, tracer, zipkinTracer, logger)
