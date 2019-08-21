@@ -52,6 +52,13 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 		encodeHTTPGenericResponse,
 		options...,
 	))
+
+	router.Methods("GET", "POST", "PUT").Path("/yahoo/callback").Handler(httptransport.NewServer(
+		endpoints.LoginEndpoint,
+		decodeHTTPYahoo,
+		encodeHTTPGenericResponse,
+		options...,
+	))
 	return router
 }
 
@@ -123,6 +130,22 @@ func decodeHTTPPostPlayerPreferenceList(ctx context.Context, r *http.Request) (i
 
 	fmt.Printf("Request Length %d \n", len(req.Body.PlayerIDs))
 	fmt.Printf("%+v \n", req)
+
+	return req, nil
+}
+
+
+
+func decodeHTTPYahoo(ctx context.Context, r *http.Request) (interface{}, error) {
+	var req UserPlayerPreferenceRequest
+
+	//var intIDs []int
+
+	//
+	//req.Body.PlayerIDs = make([]PlayerID, len(intIDs))
+	//for idx := range intIDs {
+	//	req.PlayerIDs = append(req.PlayerIDs, req.PlayerIDs[idx])
+	//}
 
 	return req, nil
 }

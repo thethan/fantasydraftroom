@@ -9,6 +9,7 @@ import (
 	"github.com/thethan/fantasydraftroom/internal/players"
 	"github.com/thethan/fantasydraftroom/internal/stats"
 	"github.com/thethan/fantasydraftroom/internal/users"
+	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -198,9 +199,10 @@ func main() {
 	playersMysqlRepository := players.NewMysqlRepository(&mysqlConnector, logger)
 
 	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
-	playersEndpoints := players.New(logger, usersMiddleware, playerService)
+	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(envMap["CONSUMER_KEY"], envMap["CONSUMER_SECRET"]))
 
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
+
 
 	var (
 	//grpcServer     = addtransport.NewGRPCServer(endpoints, tracer, zipkinTracer, logger)
@@ -230,7 +232,6 @@ func main() {
 	})
 
 	router.Use(mux.CORSMethodMiddleware(router))
-
 
 	var g group.Group
 	{

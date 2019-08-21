@@ -3,15 +3,17 @@ package players
 import (
 	"context"
 	"errors"
-	"github.com/thethan/fantasydraftroom/internal/users"
-
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
+	"github.com/thethan/fantasydraftroom/internal/users"
+	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
 )
 
 type Set struct {
 	PlayersOrder     endpoint.Endpoint
 	PlayerPreference endpoint.Endpoint
+	LoginEndpoint    endpoint.Endpoint
+	Callback    endpoint.Endpoint
 }
 
 type DraftPlayerRankingsRequest struct {
@@ -37,7 +39,7 @@ type DraftPlayerLists struct {
 }
 
 // New endpoints for players order stuff
-func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service) Set {
+func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service, auth auth.AuthService) Set {
 	var playersOrder endpoint.Endpoint
 	{
 		playersOrder = MakePlayersOrderEndpoint(svc)
@@ -54,7 +56,14 @@ func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service) S
 		playerPreference = usersMiddleware.GetAPITokenFromEndpoint(playerPreference)
 	}
 
-	return Set{PlayersOrder: playersOrder, PlayerPreference: playerPreference}
+	var loginEndpoint endpoint.Endpoint
+	{
+		loginEndpoint = MakeLoginEndpoint(auth)
+		loginEndpoint = users.LoggingMiddleware(log.With(logger, "method", "loginEndpoint"))(loginEndpoint)
+	}
+
+
+	return Set{PlayersOrder: playersOrder, PlayerPreference: playerPreference, LoginEndpoint:loginEndpoint}
 }
 
 // MakePlayersOrderEndpoint constructs a Sum endpoint wrapping the service.
@@ -88,3 +97,20 @@ func MakeUserPlayerPreference(svc Service) endpoint.Endpoint {
 		}, err
 	}
 }
+
+// MakePlayersOrderEndpoint constructs a Sum endpoint wrapping the service.
+func MakeLoginEndpoint(svc auth.AuthService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		//req := request.(UserPlayerPreferenceRequest)
+		//ctxUser := ctx.Value(users.USER)
+		//user, assertion := ctxUser.(*users.User)
+		//if assertion == false {
+		//	return nil, errors.New("could not get user")
+		//}
+		svc.GetClient()
+
+		return  nil, nil
+
+	}
+}
+
