@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"golang.org/x/oauth2"
 	"log"
-
 )
 import "github.com/Forestmb/goff"
 
+const ENVVAR_CONSUMER_KEY = "CONSUMER_KEY"
+const ENVVAR_CONSUMER_SECRET = "CONSUMER_SECRET"
 
 func NewAuthService(clientID, clientSecret string) AuthService {
-	return AuthService{ClientID:clientID, ClientSecret:clientSecret}
+	return AuthService{ClientID: clientID, ClientSecret: clientSecret}
 }
+
 type AuthService struct {
 	ClientID     string
 	ClientSecret string
@@ -28,9 +30,9 @@ func (as *AuthService) GetClient() {
 
 	// Redirect user to consent page to ask for permission
 	// for the scopes specified above.
+	as.config.Scopes = []string{}
 	url := as.config.AuthCodeURL("state", oauth2.AccessTypeOffline)
 	fmt.Printf("Visit the URL for the auth dialog: %v", url)
-
 
 	var code string
 	if _, err := fmt.Scan(&code); err != nil {
@@ -46,4 +48,3 @@ func (as *AuthService) GetClient() {
 	fmt.Printf("%v", client)
 
 }
-

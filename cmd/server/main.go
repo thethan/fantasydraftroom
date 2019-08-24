@@ -190,6 +190,7 @@ func main() {
 	router := mux.NewRouter()
 	goRouter := router.PathPrefix("/go").Subrouter()
 
+
 	// stats
 	statsService := stats.NewService(logger)
 	statsEndpoints := stats.New(logger, statsService, usersMiddleware)
@@ -199,7 +200,7 @@ func main() {
 	playersMysqlRepository := players.NewMysqlRepository(&mysqlConnector, logger)
 
 	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
-	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(envMap["CONSUMER_KEY"], envMap["CONSUMER_SECRET"]))
+	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(envMap[auth.ENVVAR_CONSUMER_KEY], envMap[auth.ENVVAR_CONSUMER_SECRET]))
 
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
 
