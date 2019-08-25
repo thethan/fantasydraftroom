@@ -79,6 +79,10 @@ func main() {
 		panic("could not read .env file")
 	}
 
+	err = godotenv.Load(*envLocation)
+	if err != nil {
+		panic("could not read .env file")
+	}
 	// Mysql Connector
 	mysqlConnector := mysql.NewConnector(logger, envMap)
 	// @todo papertrail
@@ -200,7 +204,9 @@ func main() {
 	playersMysqlRepository := players.NewMysqlRepository(&mysqlConnector, logger)
 
 	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
-	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(envMap[auth.ENVVAR_CONSUMER_KEY], envMap[auth.ENVVAR_CONSUMER_SECRET]))
+	clientID := os.Getenv("CONSUMER_KEY")
+	clientSECRET := os.Getenv("CONSUMER_SECRET")
+	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(clientID, clientSECRET))
 
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
 

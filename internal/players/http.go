@@ -137,16 +137,21 @@ func decodeHTTPPostPlayerPreferenceList(ctx context.Context, r *http.Request) (i
 
 
 func decodeHTTPYahoo(ctx context.Context, r *http.Request) (interface{}, error) {
-	var req UserPlayerPreferenceRequest
+	var req UserYahoo
 
-	//var intIDs []int
+	query := r.URL.Query()
+	codeQuery, ok := query["code"]
+	if !ok {
+		return nil, errors.New("code is missing from query string")
+	}
 
-	//
-	//req.Body.PlayerIDs = make([]PlayerID, len(intIDs))
-	//for idx := range intIDs {
-	//	req.PlayerIDs = append(req.PlayerIDs, req.PlayerIDs[idx])
-	//}
+	stateQuery, ok := query["state"]
+	if !ok {
+		return nil, errors.New("state is missing from query string")
+	}
 
+	req.Code = codeQuery[0]
+	req.State = stateQuery[0]
 	return req, nil
 }
 

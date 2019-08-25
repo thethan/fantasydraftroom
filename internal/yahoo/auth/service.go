@@ -1,11 +1,9 @@
 package auth
 
 import (
-	"context"
 	"database/sql"
-	"fmt"
 	"golang.org/x/oauth2"
-	"log"
+	"net/http"
 )
 import "github.com/Forestmb/goff"
 
@@ -22,29 +20,16 @@ type AuthService struct {
 	mysql        sql.Conn
 
 	config *oauth2.Config
+	client *goff.Client
 }
 
-func (as *AuthService) GetClient() {
-	ctx := context.Background()
-	as.config = goff.GetOAuth2Config(as.ClientID, as.ClientSecret, "https://fantasydraftroom.com/go/yahoo/callback")
+func (as *AuthService) SaveClient(c *http.Client) error {
 
-	// Redirect user to consent page to ask for permission
-	// for the scopes specified above.
-	as.config.Scopes = []string{}
-	url := as.config.AuthCodeURL("state", oauth2.AccessTypeOffline)
-	fmt.Printf("Visit the URL for the auth dialog: %v", url)
+	goff.NewClient(c)
+	return nil
 
-	var code string
-	if _, err := fmt.Scan(&code); err != nil {
-		log.Fatal(err)
-	}
-	tok, err := as.config.Exchange(ctx, code)
-	if err != nil {
-		log.Fatal(err)
-	}
+}
 
-	client := as.config.Client(ctx, tok)
-
-	fmt.Printf("%v", client)
-
+func (as AuthService) GetConfig() *oauth2.Config {
+	return goff.GetOAuth2Config(as.ClientID, as.ClientSecret, "https://fantasydraftroom.com/go/yahoo/callback")
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/thethan/fantasydraftroom/internal/users"
 	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
 )
@@ -13,7 +14,7 @@ type Set struct {
 	PlayersOrder     endpoint.Endpoint
 	PlayerPreference endpoint.Endpoint
 	LoginEndpoint    endpoint.Endpoint
-	Callback    endpoint.Endpoint
+	Callback         endpoint.Endpoint
 }
 
 type DraftPlayerRankingsRequest struct {
@@ -27,6 +28,11 @@ type UserPlayerPreferenceRequest struct {
 	Body    struct {
 		PlayerIDs []PlayerID `json:"players"`
 	} `json:"data"`
+}
+
+type UserYahoo struct {
+	Code string
+	State string
 }
 
 type GenericData struct {
@@ -58,12 +64,11 @@ func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service, a
 
 	var loginEndpoint endpoint.Endpoint
 	{
-		loginEndpoint = MakeLoginEndpoint(auth)
+		loginEndpoint = MakeLoginEndpoint(logger, auth)
 		loginEndpoint = users.LoggingMiddleware(log.With(logger, "method", "loginEndpoint"))(loginEndpoint)
 	}
 
-
-	return Set{PlayersOrder: playersOrder, PlayerPreference: playerPreference, LoginEndpoint:loginEndpoint}
+	return Set{PlayersOrder: playersOrder, PlayerPreference: playerPreference, LoginEndpoint: loginEndpoint}
 }
 
 // MakePlayersOrderEndpoint constructs a Sum endpoint wrapping the service.
@@ -99,18 +104,22 @@ func MakeUserPlayerPreference(svc Service) endpoint.Endpoint {
 }
 
 // MakePlayersOrderEndpoint constructs a Sum endpoint wrapping the service.
-func MakeLoginEndpoint(svc auth.AuthService) endpoint.Endpoint {
+func MakeLoginEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		//req := request.(UserPlayerPreferenceRequest)
-		//ctxUser := ctx.Value(users.USER)
-		//user, assertion := ctxUser.(*users.User)
-		//if assertion == false {
-		//	return nil, errors.New("could not get user")
-		//}
-		svc.GetClient()
+		r := request.(UserYahoo)
+		config := svc.GetConfig()
 
-		return  nil, nil
+		tok, err := config.Exchange(ctx, r.Code)
+		if err != nil {
+			level.Error(logger).Log("msg", "could not exchange token", "err", err)
+			return nil, err
+		}
+
+		client := config.Client(ctx, tok)
+
+		err = svc.SaveClient(client)
+
+		return nil, err
 
 	}
 }
-
