@@ -2,10 +2,11 @@ package auth
 
 import (
 	"database/sql"
+	"errors"
+	"github.com/thethan/fantasydraftroom/internal/yahoo/fantasy"
 	"golang.org/x/oauth2"
 	"net/http"
 )
-import "github.com/Forestmb/goff"
 
 const ENVVAR_CONSUMER_KEY = "CONSUMER_KEY"
 const ENVVAR_CONSUMER_SECRET = "CONSUMER_SECRET"
@@ -20,16 +21,24 @@ type AuthService struct {
 	mysql        sql.Conn
 
 	config *oauth2.Config
-	client *goff.Client
+	client *fantasy.Client
 }
 
 func (as *AuthService) SaveClient(c *http.Client) error {
-
-	goff.NewClient(c)
+	as.client = fantasy.NewClient(c)
 	return nil
 
 }
+// ReturnGoff is returning the version of the client
+func (as *AuthService) ReturnGoff() (*fantasy.Client, error) {
+	if as.client != nil {
+		return as.client, nil
+	}
 
+	return nil, errors.New("could not get client. Please try initializing it")
+}
+
+// GetConfig returns the config for the GetOauth2Config
 func (as AuthService) GetConfig() *oauth2.Config {
-	return goff.GetOAuth2Config(as.ClientID, as.ClientSecret, "https://fantasydraftroom.com/go/yahoo/callback")
+	return fantasy.GetOAuth2Config(as.ClientID, as.ClientSecret, "https://fantasydraftroom.com/go/yahoo/callback")
 }

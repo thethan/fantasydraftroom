@@ -6,6 +6,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	_ "github.com/go-sql-driver/mysql"
+	"time"
 )
 
 type Config struct {
@@ -47,6 +48,10 @@ func NewConnector(logger log.Logger, envMap map[string]string) Connector {
 // Connect returns a sql.DB that can be used to query.
 // Not keeping this persistent because for a small application think it is more trouble than it is worth
 func (c Connector) Connect() (db *sql.DB) {
+	if c.db != nil {
+		level.Info(c.log).Log("msg", "returning mysql")
+		return db
+	}
 	level.Info(c.log).Log("msg", "connecting to mysql")
 	level.Info(c.log).Log("msg", "returning connection")
 	_ = c.config.dbdriver
@@ -61,6 +66,9 @@ func (c Connector) Connect() (db *sql.DB) {
 		panic(err.Error())
 	}
 	c.db = db
+	c.db.SetMaxIdleConns(10)
+	c.db.SetMaxOpenConns(10)
+	c.db.SetConnMaxLifetime(time.Duration(360))
 	return c.db
 
 }
