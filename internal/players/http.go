@@ -65,21 +65,20 @@ func NewYahooHTTPRouter(router *mux.Router, endpoints Set, logger log.Logger) ht
 		httptransport.ServerBefore(httptransport.PopulateRequestContext),
 		httptransport.ServerBefore(users.GetBearerTokenFromHeaderToContext),
 	}
-	yahooRouter := router.PathPrefix("/yahoo").Subrouter()
-	yahooRouter.Methods("GET").Path("/leagues").Handler(httptransport.NewServer(
+	router.Methods("GET").Path("/leagues").Handler(httptransport.NewServer(
 		endpoints.LeagueEndpoint,
 		decodeHTTPYahoo,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 
-	yahooRouter.Methods("GET", "POST", "PUT").Path("/callback").Handler(httptransport.NewServer(
+	router.Methods("GET", "POST", "PUT").Path("/callback").Handler(httptransport.NewServer(
 		endpoints.LoginEndpoint,
 		decodeHTTPYahoo,
 		encodeHTTPGenericResponse,
 		options...,
 	))
-	return yahooRouter
+	return router
 }
 
 func errorEncoder(_ context.Context, err error, w http.ResponseWriter) {
