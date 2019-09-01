@@ -193,6 +193,7 @@ func main() {
 	// them to ports or anything yet; we'll do that next.
 	router := mux.NewRouter()
 	goRouter := router.PathPrefix("/go").Subrouter()
+	yahooRouter := goRouter.PathPrefix("/yahoo").Subrouter()
 
 
 	// stats
@@ -209,7 +210,7 @@ func main() {
 	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(clientID, clientSECRET))
 
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
-
+	players.NewYahooHTTPRouter(yahooRouter, playersEndpoints, logger)
 
 	var (
 	//grpcServer     = addtransport.NewGRPCServer(endpoints, tracer, zipkinTracer, logger)

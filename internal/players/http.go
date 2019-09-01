@@ -53,23 +53,33 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 		options...,
 	))
 
+
+	return router
+}
+
+func NewYahooHTTPRouter(router *mux.Router, endpoints Set, logger log.Logger) http.Handler {
 	// yahoo router is set up in order to do a lot of things
+	options := []httptransport.ServerOption{
+		httptransport.ServerErrorEncoder(errorEncoder),
+		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
+		httptransport.ServerBefore(httptransport.PopulateRequestContext),
+		httptransport.ServerBefore(users.GetBearerTokenFromHeaderToContext),
+	}
 	yahooRouter := router.PathPrefix("/yahoo").Subrouter()
-	yahooRouter.Methods("GET").Path("leagues").Handler(httptransport.NewServer(
+	yahooRouter.Methods("GET").Path("/leagues").Handler(httptransport.NewServer(
 		endpoints.LeagueEndpoint,
 		decodeHTTPYahoo,
 		encodeHTTPGenericResponse,
 		options...,
 	))
-	yahooRouter.Methods("GET", "POST", "PUT").Path("callback").Handler(httptransport.NewServer(
+
+	yahooRouter.Methods("GET", "POST", "PUT").Path("/callback").Handler(httptransport.NewServer(
 		endpoints.LoginEndpoint,
 		decodeHTTPYahoo,
 		encodeHTTPGenericResponse,
 		options...,
 	))
-
-
-	return router
+	return yahooRouter
 }
 
 func errorEncoder(_ context.Context, err error, w http.ResponseWriter) {
