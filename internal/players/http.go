@@ -54,7 +54,7 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 	))
 
 	// yahoo router is set up in order to do a lot of things
-	yahooRouter := router.PathPrefix("/yahoo")
+	yahooRouter := router.PathPrefix("/yahoo").Subrouter()
 	yahooRouter.Methods("GET").Path("leagues").Handler(httptransport.NewServer(
 		endpoints.LeagueEndpoint,
 		decodeHTTPYahoo,
