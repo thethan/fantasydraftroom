@@ -8,7 +8,6 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/thethan/fantasydraftroom/internal/users"
 	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
-	"github.com/thethan/fantasydraftroom/internal/yahoo/fantasy"
 )
 
 type Set struct {
@@ -135,18 +134,11 @@ func MakeLoginEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoin
 // MakeLeagueEndpoint constructs a Sum endpoint wrapping the service.
 func MakeLeagueEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		r := request.(UserYahoo)
-		config := svc.GetConfig()
-
-		tok, err := config.Exchange(ctx, r.Code)
+		ff, err := svc.ReturnGoff()
 		if err != nil {
 			level.Error(logger).Log("msg", "could not exchange token", "err", err)
 			return nil, err
 		}
-
-		client := config.Client(ctx, tok)
-
-		ff := fantasy.NewClient(client)
 		level.Info(logger).Log("msg", "getting league info")
 		leagues, err := ff.GetUserLeagues("2019")
 		return leagues, nil
