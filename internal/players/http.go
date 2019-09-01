@@ -59,6 +59,13 @@ func NewHTTPHandler(router *mux.Router, endpoints Set, logger log.Logger) http.H
 		encodeHTTPGenericResponse,
 		options...,
 	))
+
+	router.Methods("GET").Path("/yahoo/leagues").Handler(httptransport.NewServer(
+		endpoints.LeagueEndpoint,
+		decodeHTTPYahoo,
+		encodeHTTPGenericResponse,
+		options...,
+	))
 	return router
 }
 
