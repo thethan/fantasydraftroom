@@ -22,6 +22,7 @@ type Connector struct {
 	log    log.Logger
 	config *Config
 	db     *sql.DB
+	mu     chan string
 }
 
 const (
@@ -42,6 +43,7 @@ func NewConnector(logger log.Logger, envMap map[string]string) Connector {
 			envMap[DB_HOST],
 			envMap[DB_DATABASE],
 			envMap[DB_PORT]},
+		mu: make(chan string, 9),
 	}
 }
 
