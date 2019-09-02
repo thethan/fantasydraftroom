@@ -3,19 +3,22 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"github.com/go-kit/kit/log/level"
 	"github.com/thethan/fantasydraftroom/internal/yahoo/fantasy"
 	"golang.org/x/oauth2"
+	"github.com/go-kit/kit/log"
 	"net/http"
 )
 
 const ENVVAR_CONSUMER_KEY = "CONSUMER_KEY"
 const ENVVAR_CONSUMER_SECRET = "CONSUMER_SECRET"
 
-func NewAuthService(clientID, clientSecret string) AuthService {
-	return AuthService{ClientID: clientID, ClientSecret: clientSecret}
+func NewAuthService(log log.Logger, clientID, clientSecret string) AuthService {
+	return AuthService{log: log, ClientID: clientID, ClientSecret: clientSecret}
 }
 
 type AuthService struct {
+	log          log.Logger
 	ClientID     string
 	ClientSecret string
 	mysql        sql.Conn
@@ -26,14 +29,22 @@ type AuthService struct {
 
 func (as *AuthService) SaveClient(c *http.Client) error {
 	as.client = fantasy.NewClient(c)
+	as.log.Log("msg", "saving client to authservice")
+	level.Debug(as.log).Log("client", c)
+	level.Debug(as.log).Log("as.client", as.client)
 	return nil
 
 }
+
 // ReturnGoff is returning the version of the client
 func (as *AuthService) ReturnGoff() (*fantasy.Client, error) {
+	level.Debug(as.log).Log("msg", "ReturnGoff")
+
 	if as.client != nil {
 		return as.client, nil
 	}
+	level.Debug(as.log).Log("msg", "goff == nil", "as.client", as.client)
+
 
 	return nil, errors.New("could not get client. Please try initializing it")
 }
