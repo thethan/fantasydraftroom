@@ -67,26 +67,26 @@ func NewYahooHTTPRouter(router *mux.Router, endpoints Set, logger log.Logger) ht
 	}
 	router.Methods("GET").Path("/leagues").Handler(httptransport.NewServer(
 		endpoints.LeagueEndpoint,
-		decodeHTTPGetPlayerOrderList,
+		decodeHTTPYahoo,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 
 	router.Methods("GET").Path("/callback").Handler(httptransport.NewServer(
 		endpoints.LoginEndpoint,
-		decodeHTTPYahoo,
+		decodeHTTPYahooCallback,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 	router.Methods("POST").Path("/callback").Handler(httptransport.NewServer(
 		endpoints.LoginEndpoint,
-		decodeHTTPYahoo,
+		decodeHTTPYahooCallback,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 	router.Methods("PUT").Path("/callback").Handler(httptransport.NewServer(
 		endpoints.LoginEndpoint,
-		decodeHTTPYahoo,
+		decodeHTTPYahooCallback,
 		encodeHTTPGenericResponse,
 		options...,
 	))
@@ -167,7 +167,7 @@ func decodeHTTPPostPlayerPreferenceList(ctx context.Context, r *http.Request) (i
 
 
 
-func decodeHTTPYahoo(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeHTTPYahooCallback(ctx context.Context, r *http.Request) (interface{}, error) {
 	var req UserYahoo
 
 	query := r.URL.Query()
@@ -184,6 +184,12 @@ func decodeHTTPYahoo(ctx context.Context, r *http.Request) (interface{}, error) 
 	req.Code = codeQuery[0]
 	req.State = stateQuery[0]
 	return req, nil
+}
+
+
+func decodeHTTPYahoo(ctx context.Context, r *http.Request) (interface{}, error) {
+
+	return r, nil
 }
 
 // encodeHTTPGenericRequest is a transport/http.EncodeRequestFunc that
