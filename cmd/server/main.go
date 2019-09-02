@@ -207,7 +207,7 @@ func main() {
 	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
 	clientID := os.Getenv("CONSUMER_KEY")
 	clientSECRET := os.Getenv("CONSUMER_SECRET")
-	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(clientID, clientSECRET))
+	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(logger, clientID, clientSECRET))
 
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
 	players.NewYahooHTTPRouter(yahooRouter, playersEndpoints, logger)
