@@ -67,12 +67,24 @@ func NewYahooHTTPRouter(router *mux.Router, endpoints Set, logger log.Logger) ht
 	}
 	router.Methods("GET").Path("/leagues").Handler(httptransport.NewServer(
 		endpoints.LeagueEndpoint,
-		decodeHTTPYahoo,
+		decodeHTTPGetPlayerOrderList,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 
-	router.Methods("POST", "PUT").Path("/callback").Handler(httptransport.NewServer(
+	router.Methods("GET").Path("/callback").Handler(httptransport.NewServer(
+		endpoints.LoginEndpoint,
+		decodeHTTPYahoo,
+		encodeHTTPGenericResponse,
+		options...,
+	))
+	router.Methods("POST").Path("/callback").Handler(httptransport.NewServer(
+		endpoints.LoginEndpoint,
+		decodeHTTPYahoo,
+		encodeHTTPGenericResponse,
+		options...,
+	))
+	router.Methods("PUT").Path("/callback").Handler(httptransport.NewServer(
 		endpoints.LoginEndpoint,
 		decodeHTTPYahoo,
 		encodeHTTPGenericResponse,
