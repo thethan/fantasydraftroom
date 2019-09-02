@@ -31,7 +31,7 @@ func main() {
 	fs := flag.NewFlagSet("stats", flag.ContinueOnError)
 	var (
 		//debugAddr = fs.String("debug.addr", ":8080", "Debug and metrics listen address")
-		httpAddr = fs.String("http-addr", ":8081", "HTTP listen address")
+		httpAddr    = fs.String("http-addr", ":8081", "HTTP listen address")
 		envLocation = fs.String("env", ".env", "Env Location")
 		//grpcAddr       = fs.String("grpc-addr", ":8082", "gRPC listen address")
 		//thriftAddr     = fs.String("thrift-addr", ":8083", "Thrift listen address")
@@ -50,7 +50,7 @@ func main() {
 	writer := papertrail.Writer{
 		Port:    42629,
 		Network: papertrail.TCP,
-		Server: "logs6",
+		Server:  "logs6",
 	}
 
 	// use writer directly
@@ -195,7 +195,6 @@ func main() {
 	goRouter := router.PathPrefix("/go").Subrouter()
 	yahooRouter := goRouter.PathPrefix("/yahoo").Subrouter()
 
-
 	// stats
 	statsService := stats.NewService(logger)
 	statsEndpoints := stats.New(logger, statsService, usersMiddleware)
@@ -207,7 +206,8 @@ func main() {
 	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
 	clientID := os.Getenv("CONSUMER_KEY")
 	clientSECRET := os.Getenv("CONSUMER_SECRET")
-	playersEndpoints := players.New(logger, usersMiddleware, playerService, auth.NewAuthService(logger, clientID, clientSECRET))
+	authService := auth.NewAuthService(logger, clientID, clientSECRET)
+	playersEndpoints := players.New(logger, usersMiddleware, playerService, &authService)
 
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
 	players.NewYahooHTTPRouter(yahooRouter, playersEndpoints, logger)

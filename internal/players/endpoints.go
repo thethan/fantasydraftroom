@@ -46,7 +46,7 @@ type DraftPlayerLists struct {
 }
 
 // New endpoints for players order stuff
-func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service, auth auth.AuthService) Set {
+func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service, auth *auth.AuthService) Set {
 	var playersOrder endpoint.Endpoint
 	{
 		playersOrder = MakePlayersOrderEndpoint(svc)
@@ -111,7 +111,7 @@ func MakeUserPlayerPreference(svc Service) endpoint.Endpoint {
 }
 
 // MakePlayersOrderEndpoint constructs a Sum endpoint wrapping the service.
-func MakeLoginEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoint {
+func MakeLoginEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		r := request.(UserYahoo)
 		config := svc.GetConfig()
@@ -143,7 +143,7 @@ func MakeLoginEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoin
 }
 
 // MakeLeagueEndpoint constructs a Sum endpoint wrapping the service.
-func MakeLeagueEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoint {
+func MakeLeagueEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		ff, err := svc.ReturnGoff()
 		if err != nil {
