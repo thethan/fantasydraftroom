@@ -126,7 +126,18 @@ func MakeLoginEndpoint(logger log.Logger, svc auth.AuthService) endpoint.Endpoin
 
 		err = svc.SaveClient(client)
 
-		return nil, err
+		level.Info(logger).Log("msg", "could not", "err", err)
+
+		ff, err := svc.ReturnGoff()
+		if err  != nil {
+			return nil, err
+		}
+		leagues, err := ff.GetUserLeagues("2019")
+		if err != nil {
+			return nil, err
+		}
+
+		return leagues, err
 
 	}
 }
