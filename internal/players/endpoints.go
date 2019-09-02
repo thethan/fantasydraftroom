@@ -71,8 +71,8 @@ func New(logger log.Logger, usersMiddleware users.UserMiddleware, svc Service, a
 
 	var leagueEndpoint endpoint.Endpoint
 	{
-		loginEndpoint = MakeLeagueEndpoint(logger, auth)
-		loginEndpoint = users.LoggingMiddleware(log.With(logger, "method", "LeagueEndpoint"))(loginEndpoint)
+		leagueEndpoint = MakeLeagueEndpoint(logger, auth)
+		leagueEndpoint = users.LoggingMiddleware(log.With(logger, "method", "LeagueEndpoint"))(leagueEndpoint)
 	}
 
 	return Set{PlayersOrder: playersOrder, PlayerPreference: playerPreference, LoginEndpoint: loginEndpoint, LeagueEndpoint: leagueEndpoint}
