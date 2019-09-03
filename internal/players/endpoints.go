@@ -150,7 +150,7 @@ func MakeLeagueEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpo
 			level.Error(logger).Log("msg", "could not exchange token", "err", err)
 			return nil, err
 		}
-		level.Info(logger).Log("msg", "getting league info")
+		level.Info(logger).Log("msg", "getting leagues info")
 		leagues, err := ff.GetUserLeagues("2019")
 		return leagues, nil
 

@@ -6,7 +6,7 @@ import (
 	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
 )
 
-// Service Import stats for a league ID
+// Service Import stats for a leagues ID
 type Service interface {
 	GetLeagueStats(leagueID int) error
 }

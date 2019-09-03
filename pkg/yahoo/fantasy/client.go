@@ -513,7 +513,7 @@ func (c *Client) GetPlayersStats(leagueKey string, week int, players []Player) (
 	}
 
 	content, err := c.GetFantasyContent(
-		fmt.Sprintf("%s/league/%s/players;player_keys=%s/stats;type=week;week=%d",
+		fmt.Sprintf("%s/leagues/%s/players;player_keys=%s/stats;type=week;week=%d",
 			YahooBaseURL,
 			leagueKey,
 			playerKeys,
@@ -539,10 +539,10 @@ func (c *Client) GetTeamRoster(teamKey string, week int) ([]Player, error) {
 	return content.Team.Roster.Players, nil
 }
 
-// GetLeagueStandings gets a league containing the current standings.
+// GetLeagueStandings gets a leagues containing the current standings.
 func (c *Client) GetLeagueStandings(leagueKey string) (*League, error) {
 	content, err := c.GetFantasyContent(
-		fmt.Sprintf("%s/league/%s;out=standings,settings",
+		fmt.Sprintf("%s/leagues/%s;out=standings,settings",
 			YahooBaseURL,
 			leagueKey))
 	if err != nil {
@@ -554,7 +554,7 @@ func (c *Client) GetLeagueStandings(leagueKey string) (*League, error) {
 // GetAllTeamStats gets teams stats for a given week.
 func (c *Client) GetAllTeamStats(leagueKey string, week int) ([]Team, error) {
 	content, err := c.GetFantasyContent(
-		fmt.Sprintf("%s/league/%s/teams/stats;type=week;week=%d",
+		fmt.Sprintf("%s/leagues/%s/teams/stats;type=week;week=%d",
 			YahooBaseURL,
 			leagueKey,
 			week))
@@ -581,10 +581,10 @@ func (c *Client) GetTeam(teamKey string) (*Team, error) {
 	return &content.Team, nil
 }
 
-// GetLeagueMetadata returns the metadata associated with the given league.
+// GetLeagueMetadata returns the metadata associated with the given leagues.
 func (c *Client) GetLeagueMetadata(leagueKey string) (*League, error) {
 	content, err := c.GetFantasyContent(
-		fmt.Sprintf("%s/league/%s/metadata",
+		fmt.Sprintf("%s/leagues/%s/metadata",
 			YahooBaseURL,
 			leagueKey))
 	if err != nil {
@@ -593,10 +593,10 @@ func (c *Client) GetLeagueMetadata(leagueKey string) (*League, error) {
 	return &content.League, nil
 }
 
-// GetAllTeams returns all teams playing in the given league.
+// GetAllTeams returns all teams playing in the given leagues.
 func (c *Client) GetAllTeams(leagueKey string) ([]Team, error) {
 	content, err := c.GetFantasyContent(
-		fmt.Sprintf("%s/league/%s/teams", YahooBaseURL, leagueKey))
+		fmt.Sprintf("%s/leagues/%s/teams", YahooBaseURL, leagueKey))
 	if err != nil {
 		return nil, err
 	}
@@ -611,7 +611,7 @@ func (c *Client) GetMatchupsForWeekRange(leagueKey string, startWeek, endWeek in
 		leagueList += "," + strconv.Itoa(i)
 	}
 	content, err := c.GetFantasyContent(
-		fmt.Sprintf("%s/league/%s/scoreboard;week=%s",
+		fmt.Sprintf("%s/leagues/%s/scoreboard;week=%s",
 			YahooBaseURL,
 			leagueKey,
 			leagueList))

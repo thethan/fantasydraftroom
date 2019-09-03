@@ -10,7 +10,7 @@ import "encoding/xml"
 // to the fantasy sports API.
 type FantasyContent struct {
 	XMLName xml.Name `xml:"fantasy_content"`
-	League  League   `xml:"league"`
+	League  League   `xml:"leagues"`
 	Team    Team     `xml:"team"`
 	Users   []User   `xml:"users>user"`
 }
@@ -23,7 +23,7 @@ type User struct {
 // Game represents a single year in the Yahoo fantasy football ecosystem. It consists
 // of zero or more leagues.
 type Game struct {
-	Leagues []League `xml:"leagues>league"`
+	Leagues []League `xml:"leagues>leagues"`
 }
 
 // A League is a uniquely identifiable group of players and teams. The scoring system,
@@ -45,7 +45,7 @@ type League struct {
 	Settings    Settings   `xml:"settings"`
 }
 
-// A Team is a participant in exactly one league.
+// A Team is a participant in exactly one leagues.
 type Team struct {
 	TeamKey               string        `xml:"team_key"`
 	TeamID                uint64        `xml:"team_id"`
@@ -65,7 +65,7 @@ type Team struct {
 	Players               []Player      `xml:"players>player"`
 }
 
-// Settings describes how a league is configured
+// Settings describes how a leagues is configured
 type Settings struct {
 	DraftType        string         `xml:"draft_type"`
 	ScoringType      string         `xml:"scoring_type"`
@@ -114,14 +114,14 @@ type Points struct {
 }
 
 // Record is the number of wins, losses, and ties for a given team in their
-// league.
+// leagues.
 type Record struct {
 	Wins   int `xml:"wins"`
 	Losses int `xml:"losses"`
 	Ties   int `xml:"ties"`
 }
 
-// TeamStandings describes how a single Team ranks in their league.
+// TeamStandings describes how a single Team ranks in their leagues.
 type TeamStandings struct {
 	Rank          int
 	RankStr       string  `xml:"rank"`

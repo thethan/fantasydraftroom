@@ -5,11 +5,13 @@ import (
 	"fmt"
 	goKit "github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
+	"github.com/thethan/fantasydraftroom/internal/leagues"
 	"github.com/thethan/fantasydraftroom/internal/mysql"
 	"github.com/thethan/fantasydraftroom/internal/players"
 	"github.com/thethan/fantasydraftroom/internal/stats"
 	"github.com/thethan/fantasydraftroom/internal/users"
-	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
+	"github.com/thethan/fantasydraftroom/pkg/yahoo/auth"
+	pkgLeague "github.com/thethan/fantasydraftroom/pkg/yahoo/leagues"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -209,6 +211,11 @@ func main() {
 	authService := auth.NewAuthService(logger, clientID, clientSECRET)
 	playersEndpoints := players.New(logger, usersMiddleware, playerService, &authService)
 
+	// Leagues
+	leagueService := pkgLeague.NewService(logger, &authService)
+	leagueEndpoints := leagues.New(logger, usersMiddleware, &leagueService)
+
+	leagues.NewHTTPHandler(goRouter, leagueEndpoints, logger)
 	players.NewHTTPHandler(goRouter, playersEndpoints, logger)
 	players.NewYahooHTTPRouter(yahooRouter, playersEndpoints, logger)
 

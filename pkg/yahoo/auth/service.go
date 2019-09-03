@@ -1,35 +1,54 @@
 package auth
 
-import "time"
+import (
+	"database/sql"
+	"errors"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
+	"github.com/thethan/fantasydraftroom/pkg/yahoo/fantasy"
+	"golang.org/x/oauth2"
+	"net/http"
+)
 
-type YahooAuth struct {
-	AccessToken     string
-	TokenType       string
-	ExpiresIn       time.Duration
-	RefreshToken    string
-	XoauthYahooGuid string
-	createdAt       time.Time
-	updatedAt       *time.Time
+const ENVVAR_CONSUMER_KEY = "CONSUMER_KEY"
+const ENVVAR_CONSUMER_SECRET = "CONSUMER_SECRET"
+
+func NewAuthService(log log.Logger, clientID, clientSecret string) AuthService {
+	return AuthService{log: log, ClientID: clientID, ClientSecret: clientSecret}
 }
 
-// IsValidToken tells you if the token is valid
-func (y *YahooAuth) IsValidToken() bool {
-	tokenTimeCreated := y.createdAt
-	if y.updatedAt != nil {
-		tokenTimeCreated = *y.updatedAt
+type AuthService struct {
+	log          log.Logger
+	ClientID     string
+	ClientSecret string
+	mysql        sql.Conn
+
+	config *oauth2.Config
+	client *fantasy.Client
+}
+
+func (as *AuthService) SaveClient(c *http.Client) error {
+	as.client = fantasy.NewClient(c)
+	as.log.Log("msg", "saving client to authservice")
+	level.Debug(as.log).Log("client", c)
+	level.Debug(as.log).Log("as.client", as.client)
+	return nil
+
+}
+
+// ReturnGoff is returning the version of the client
+func (as *AuthService) ReturnGoff() (*fantasy.Client, error) {
+	level.Debug(as.log).Log("msg", "ReturnGoff")
+
+	if as.client != nil {
+		return as.client, nil
 	}
-	currentTime := time.Now()
-	tokenTime := currentTime.Sub(tokenTimeCreated)
-	return tokenTime < y.ExpiresIn
+	level.Debug(as.log).Log("msg", "goff == nil", "as.client", as.client)
+
+	return nil, errors.New("could not get client. Please try initializing it")
 }
 
-// UpdateToken will update a yahoo token
-func (y *YahooAuth) UpdateToken(accessToken, tokenType, refreshToken, XoauthYahooGuid string, updatedAt *time.Time, expiresIn time.Duration) {
-	y.AccessToken = accessToken
-	y.TokenType = tokenType
-	y.RefreshToken = refreshToken
-	y.XoauthYahooGuid = XoauthYahooGuid
-	y.updatedAt = updatedAt
-	y.ExpiresIn = expiresIn
-
+// GetConfig returns the config for the GetOauth2Config
+func (as AuthService) GetConfig() *oauth2.Config {
+	return fantasy.GetOAuth2Config(as.ClientID, as.ClientSecret, "https://fantasydraftroom.com/go/yahoo/callback")
 }

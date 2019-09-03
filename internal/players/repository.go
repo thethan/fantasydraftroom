@@ -18,8 +18,9 @@ func NewMysqlRepository(connector *mysql.Connector, log log.Logger) MysqlReposit
 }
 
 type MysqlRepository struct {
-	connector *mysql.Connector
-	log       log.Logger
+	connector          *mysql.Connector
+	log                log.Logger
+	preparedStatements map[string]string
 }
 
 func (r MysqlRepository) GetDefaultPlayerRank(ctx context.Context, wg *sync.WaitGroup, draftID int, resultsChan chan<- Results) (error) {
@@ -116,18 +117,17 @@ func (r MysqlRepository) GetDraftResults(ctx context.Context, wg *sync.WaitGroup
 	return nil
 }
 
-
 func (r MysqlRepository) RemoveFromListIfNotIn(ctx context.Context, draftID int, userID int, playerList []int) error {
 	db := r.connector.Connect()
 
 	stmt, err := db.Prepare("DELETE FROM fdr_user_player_preferences WHERE user_id = ? and draft_id = ?")
 	if err != nil {
-		_ =level.Error(r.log).Log("error:", err)
+		_ = level.Error(r.log).Log("error:", err)
 
 		return err
 	}
 
-	_, err = stmt.Query( userID, draftID)
+	_, err = stmt.Query(userID, draftID)
 	if err != nil {
 		return err
 	}
@@ -135,14 +135,13 @@ func (r MysqlRepository) RemoveFromListIfNotIn(ctx context.Context, draftID int,
 
 }
 
-
 func (r MysqlRepository) SaveUserPlayerPreference(ctx context.Context, wg *sync.WaitGroup, draftID int, userID int, playerID int, preferenceOrder int) error {
 	defer wg.Done()
 	db := r.connector.Connect()
 
 	stmt, err := db.Prepare("SELECT id FROM fdr_user_player_preferences WHERE draft_id = ? AND user_id = ? AND player_id = ? ORDER BY id DESC LIMIT 1")
 	if err != nil {
-		_ =level.Error(r.log).Log("error:", err)
+		_ = level.Error(r.log).Log("error:", err)
 
 		return err
 	}
@@ -154,12 +153,12 @@ func (r MysqlRepository) SaveUserPlayerPreference(ctx context.Context, wg *sync.
 	var id int
 	if results.Next() {
 		err = results.Scan(&id)
-		_ =level.Debug(r.log).Log("Found id:", id)
+		_ = level.Debug(r.log).Log("Found id:", id)
 	}
 	if id == 0 {
 		insertStmt, err := db.Prepare("INSERT INTO fdr_user_player_preferences (draft_id, user_id, player_id, preference_order, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())")
 		if err != nil {
-			_ =level.Error(r.log).Log("error:", err)
+			_ = level.Error(r.log).Log("error:", err)
 
 			return err
 		}
