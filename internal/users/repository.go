@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/go-kit/kit/log"
 	"github.com/thethan/fantasydraftroom/internal/mysql"
-	"github.com/thethan/fantasydraftroom/pkg/yahoo/auth"
-	"time"
 )
 
 type MysqlRepository struct {
@@ -36,28 +34,4 @@ func (r MysqlRepository) GetUserByApiToken(ctx context.Context, apiToken string)
 	}
 
 	return &user, nil
-}
-
-
-// GetYahooToken retrieves the yahoo token from the database
-func (r MysqlRepository) GetYahooToken(ctx context.Context) (*auth.YahooAuth, error) {
-	db := r.connector.Connect()
-	defer db.Close()
-
-	stmt, err := db.Prepare("SELECT access_token, token_type, expires_in, refresh_token, xoauth_yahoo_guid, created_at, updated_at FROM fdr_yahoo_tokens WHERE user_id = ?")
-	if err != nil {
-		return nil, err
-	}
-	userID := ctx.Value(USER)
-	row := stmt.QueryRow(userID)
-	var yahooAuth auth.YahooAuth
-
-	var createdAt, updatedAt mysql.NullTime
-	err = row.Scan(&yahooAuth.AccessToken, &yahooAuth.TokenType, &yahooAuth.ExpiresIn, &yahooAuth.RefreshToken, &yahooAuth, &yahooAuth.XoauthYahooGuid, &createdAt, &updatedAt)
-	if err != nil {
-		return nil, err
-	}
-	yahooAuth.UpdateToken(yahooAuth.AccessToken, yahooAuth.TokenType, yahooAuth.RefreshToken, yahooAuth.XoauthYahooGuid, &updatedAt.Time, time.Duration(time.Second*yahooAuth.ExpiresIn))
-	return &yahooAuth, nil
-
 }

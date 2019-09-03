@@ -3,7 +3,7 @@ package users
 import (
 	"database/sql"
 	"github.com/go-kit/kit/log"
-	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
+	"github.com/thethan/fantasydraftroom/pkg/yahoo/auth"
 )
 
 type Repository struct {

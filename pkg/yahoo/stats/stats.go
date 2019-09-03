@@ -3,7 +3,7 @@ package stats
 import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/thethan/fantasydraftroom/internal/yahoo/auth"
+	"github.com/thethan/fantasydraftroom/pkg/yahoo/auth"
 )
 
 // Service Import stats for a leagues ID
