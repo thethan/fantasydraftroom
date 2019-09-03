@@ -499,6 +499,7 @@ func (c *Client) GetUserLeagues(year string) ([]League, error) {
 		return make([]League, 0), nil
 	}
 
+	fmt.Printf("Response %+v\n", content.Users)
 	return content.Users[0].Games[0].Leagues, nil
 }
 
