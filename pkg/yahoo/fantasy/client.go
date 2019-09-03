@@ -477,6 +477,8 @@ func (c *Client) GetFantasyContent(url string) (*FantasyContent, error) {
 // year.
 func (c *Client) GetUserLeagues(year string) ([]League, error) {
 	yearKey, ok := YearKeys[year]
+	fmt.Printf("Year Key %+v\n", yearKey)
+
 	if !ok {
 		return nil, fmt.Errorf("data not available for year=%s", year)
 	}
