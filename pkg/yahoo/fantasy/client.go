@@ -495,6 +495,7 @@ func (c *Client) GetUserLeagues(year string) ([]League, error) {
 
 	if len(content.Users[0].Games) == 0 ||
 		content.Users[0].Games[0].Leagues == nil {
+		fmt.Println("No Leagues found")
 		return make([]League, 0), nil
 	}
 
