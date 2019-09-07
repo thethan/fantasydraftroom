@@ -114,24 +114,20 @@ func MakeUserPlayerPreference(svc Service) endpoint.Endpoint {
 func MakeLoginEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		r := request.(UserYahoo)
-		config := svc.GetConfig()
 
-		tok, err := config.Exchange(ctx, r.Code)
 		if err != nil {
 			level.Error(logger).Log("msg", "could not exchange token", "err", err)
 			return nil, err
 		}
-
-		client := config.Client(ctx, tok)
-
-		err = svc.SaveClient(client)
-
-		level.Info(logger).Log("msg", "could not", "err", err)
-
-		ff, err := svc.ReturnGoff()
+		// todo save user if not userID
+		err = svc.AuthenticateUser(ctx, r.Code)
 		if err  != nil {
 			return nil, err
 		}
+		level.Info(logger).Log("msg", "could not", "err", err)
+
+		ff, err := svc.ReturnGoff(auth.USERID)
+
 		leagues, err := ff.GetUserLeagues("2019")
 		if err != nil {
 			return nil, err
