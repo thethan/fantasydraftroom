@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/thethan/fantasydraftroom/pkg/yahoo/auth"
 	"golang.org/x/oauth2"
 )
 
@@ -13,7 +12,6 @@ const SaveYahooToken  = "SaveYahooToken"
 type Repository struct {
 	log         log.Logger
 	db          *sql.DB
-	authService *auth.AuthService
 	statements map[string]*sql.Stmt
 }
 

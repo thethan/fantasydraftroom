@@ -126,7 +126,7 @@ func MakeLoginEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpoi
 		}
 		level.Info(logger).Log("msg", "could not", "err", err)
 
-		ff, err := svc.ReturnGoff(auth.USERID)
+		ff, err := svc.ReturnGoff(1)
 
 		leagues, err := ff.GetUserLeagues("2019")
 		if err != nil {
@@ -141,7 +141,7 @@ func MakeLoginEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpoi
 // MakeLeagueEndpoint constructs a Sum endpoint wrapping the service.
 func MakeLeagueEndpoint(logger log.Logger, svc *auth.AuthService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		ff, err := svc.ReturnGoff()
+		ff, err := svc.ReturnGoff(1)
 		if err != nil {
 			level.Error(logger).Log("msg", "could not exchange token", "err", err)
 			return nil, err
