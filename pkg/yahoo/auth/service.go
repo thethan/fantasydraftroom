@@ -17,7 +17,8 @@ const ENVVAR_CONSUMER_SECRET = "CONSUMER_SECRET"
 const USERID = 1
 
 func NewAuthService(log log.Logger, clientID, clientSecret string, repository *users.Repository) AuthService {
-	return AuthService{log: log, ClientID: clientID, ClientSecret: clientSecret, userRepo: repository}
+	userClients := make(map[int]*fantasy.Client, 0)
+	return AuthService{log: log, ClientID: clientID, ClientSecret: clientSecret, userRepo: repository, userToClients:userClients}
 }
 
 type AuthService struct {
