@@ -16,8 +16,8 @@ const ENVVAR_CONSUMER_KEY = "CONSUMER_KEY"
 const ENVVAR_CONSUMER_SECRET = "CONSUMER_SECRET"
 const USERID = 1
 
-func NewAuthService(log log.Logger, clientID, clientSecret string) AuthService {
-	return AuthService{log: log, ClientID: clientID, ClientSecret: clientSecret}
+func NewAuthService(log log.Logger, clientID, clientSecret string, repository *users.Repository) AuthService {
+	return AuthService{log: log, ClientID: clientID, ClientSecret: clientSecret, userRepo: repository}
 }
 
 type AuthService struct {

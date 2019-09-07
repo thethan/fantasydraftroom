@@ -4,14 +4,19 @@ import (
 	"database/sql"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/thethan/fantasydraftroom/internal/mysql"
 	"golang.org/x/oauth2"
 )
 
 const SaveYahooToken  = "SaveYahooToken"
 
+func NewRepository(log log.Logger, db *mysql.Connector) Repository {
+	return Repository{log: log, db: db}
+}
+
 type Repository struct {
 	log         log.Logger
-	db          *sql.DB
+	db          *mysql.Connector
 	statements map[string]*sql.Stmt
 }
 
@@ -26,7 +31,8 @@ func (r Repository) GetUser() {
 }
 
 func (r Repository) prepareSaveYahooToken() (*sql.Stmt, error) {
-	stmt, err := r.db.Prepare("REPLACE INTO fdr_yahoo_tokens (access_token, token_type, expires_in, refresh_token, updated_at) VALUES (? , ? , ? , ? , NOW()) WHERE user_id = ?")
+	db := r.db.Connect()
+	stmt, err := db.Prepare("REPLACE INTO fdr_yahoo_tokens (access_token, token_type, expires_in, refresh_token, updated_at) VALUES (? , ? , ? , ? , NOW()) WHERE user_id = ?")
 	if err != nil {
 		level.Error(r.log).Log("msg", "error in prerparing SaveYahooToken sql", "error", err)
 		return nil, err

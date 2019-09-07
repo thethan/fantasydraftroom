@@ -5,6 +5,7 @@ import (
 	"fmt"
 	goKit "github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
+	phpUsers "github.com/thethan/fantasydraftroom/internal/fdr/php/users"
 	"github.com/thethan/fantasydraftroom/internal/leagues"
 	"github.com/thethan/fantasydraftroom/internal/mysql"
 	"github.com/thethan/fantasydraftroom/internal/players"
@@ -204,11 +205,13 @@ func main() {
 
 	// Players
 	playersMysqlRepository := players.NewMysqlRepository(&mysqlConnector, logger)
+	// user repo
+	userRepository := phpUsers.NewRepository(logger, &mysqlConnector)
 
 	playerService := players.NewService(logger, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository, &playersMysqlRepository)
 	clientID := os.Getenv("CONSUMER_KEY")
 	clientSECRET := os.Getenv("CONSUMER_SECRET")
-	authService := auth.NewAuthService(logger, clientID, clientSECRET)
+	authService := auth.NewAuthService(logger, clientID, clientSECRET, &userRepository)
 	playersEndpoints := players.New(logger, usersMiddleware, playerService, &authService)
 
 	// Leagues
