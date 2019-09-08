@@ -32,7 +32,7 @@ func (r Repository) GetUser() {
 
 func (r Repository) prepareSaveYahooToken() (*sql.Stmt, error) {
 	db := r.db.Connect()
-	stmt, err := db.Prepare("UPDATE fdr_yahoo_tokens SET access_token = ? , token_type = ?, expires_in = ?, refresh_token = ?,  updated_at = NOW () WHERE user_id = ?")
+	stmt, err := db.Prepare("UPDATE fdr_yahoo_tokens SET access_token = ? , token_type = ?, expires_in = ?, refresh_token = ?,  updated_at = NOW() WHERE user_id = ?")
 	if err != nil {
 		level.Error(r.log).Log("msg", "error in prerparing SaveYahooToken sql", "error", err)
 		return nil, err
