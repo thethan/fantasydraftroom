@@ -11,7 +11,8 @@ import (
 const SaveYahooToken  = "SaveYahooToken"
 
 func NewRepository(log log.Logger, db *mysql.Connector) Repository {
-	return Repository{log: log, db: db}
+	prepMap := make(map[string]*sql.Stmt)
+	return Repository{log: log, db: db, statements: prepMap}
 }
 
 type Repository struct {
