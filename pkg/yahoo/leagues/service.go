@@ -19,7 +19,7 @@ type Service struct {
 
 // Get League returns a specific leagues and its information for a user.
 func (svc Service) GetLeague(ctx context.Context, leagueID string) (*fantasy.League, error) {
-	client, err := svc.client.ReturnGoff(1)
+	client, err := svc.client.ReturnGoff(ctx,1)
 	if err != nil {
 		level.Error(svc.log).Log("msg", "error getting client from auth service", "err", err)
 	}
