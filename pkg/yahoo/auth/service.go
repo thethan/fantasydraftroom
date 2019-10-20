@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/thethan/fantasydraftroom/internal/fdr/php/users"
@@ -59,18 +58,32 @@ func (as *AuthService) AuthenticateUser(ctx context.Context, yahooTokenCode stri
 }
 
 // ReturnGoff is returning the version of the client
-func (as *AuthService) ReturnGoff(userID int) (*fantasy.Client, error) {
+func (as *AuthService) ReturnGoff(ctx context.Context, userID int) (*fantasy.Client, error) {
+	token, err := as.userRepo.GetYahooToken(USERID)
+	if err != nil {
+		return nil, err
+	}
+
 	level.Debug(as.log).Log("msg", "ReturnGoff")
 
 	if client, ok :=  as.userToClients[userID]; ok {
 		return client, nil
 	}
-	level.Debug(as.log).Log("msg", "goff == nil", "as.client", as.client)
 
-	return nil, errors.New("could not get client. Please try initializing it")
+	client := oauth2.NewClient(ctx, TokenSource{TokenTo:token})
+
+	return fantasy.NewClient(client), err
 }
 
 // GetConfig returns the config for the GetOauth2Config
 func (as AuthService) GetConfig() *oauth2.Config {
 	return fantasy.GetOAuth2Config(as.ClientID, as.ClientSecret, "https://fantasydraftroom.com/go/yahoo/callback")
+}
+
+type TokenSource struct {
+	TokenTo *oauth2.Token
+}
+
+func (ts TokenSource) Token() (*oauth2.Token, error) {
+	return ts.TokenTo, nil
 }

@@ -466,6 +466,7 @@ func (o *countingHTTPApiClient) RequestCount() int {
 //
 // See http://developer.yahoo.com/fantasysports/guide/ for more information
 func (c *Client) GetFantasyContent(url string) (*FantasyContent, error) {
+	fmt.Printf("%s\n",url)
 	return c.Provider.Get(url)
 }
 
@@ -495,7 +496,6 @@ func (c *Client) GetUserLeagues(year string) ([]League, error) {
 		return nil, errors.New("no users returned for current user")
 	}
 	fmt.Printf("Response %+v\n", content.Users)
-
 
 	if len(content.Users[0].Games) == 0 ||
 		content.Users[0].Games[0].Leagues == nil {
